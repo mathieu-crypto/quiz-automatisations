@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quel système d'automatisation correspond à votre business ?</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f8f6;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: #1a1a1a;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 560px;
+  }
+  .brand {
+    font-size: 13px;
+    font-weight: 600;
+    color: #7F77DD;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .progress-bar { height: 3px; background: #ebebeb; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #7F77DD; border-radius: 2px; transition: width 0.4s ease; }
+
+  .step { display: none; } .step.active { display: block; }
+  .question-label { font-size: 12px; font-weight: 600; color: #7F77DD; letter-spacing: .07em; text-transform: uppercase; margin-bottom: .4rem; }
+  .question-text { font-size: 19px; font-weight: 600; color: #111; line-height: 1.4; margin-bottom: 1.5rem; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 13px 15px;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: left; width: 100%;
+  }
+  .opt:hover { border-color: #7F77DD; background: #f7f6ff; }
+  .opt.selected { border-color: #7F77DD; background: #EEEDFE; }
+  .opt-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #f3f3f0; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; font-size: 16px;
+  }
+  .opt-title { font-size: 14px; font-weight: 600; color: #111; display: block; margin-bottom: 2px; }
+  .opt-sub { font-size: 12px; color: #888; }
+
+  .nav { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
+  .btn-next {
+    background: #7F77DD; color: #fff; border: none;
+    border-radius: 8px; padding: 10px 24px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    opacity: .35; transition: opacity .15s;
+  }
+  .btn-next.ready { opacity: 1; }
+  .btn-next.ready:hover { background: #6b63c9; }
+
+  /* EMAIL GATE */
+  .email-gate { display: none; text-align: center; padding: .5rem 0; }
+  .email-gate.active { display: block; }
+  .gate-emoji { font-size: 40px; margin-bottom: 1rem; }
+  .gate-title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: .5rem; }
+  .gate-sub { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 1.5rem; }
+  .email-row { display: flex; gap: 8px; margin-bottom: .75rem; }
+  .email-input {
+    flex: 1; height: 42px; border: 1.5px solid #ddd;
+    border-radius: 8px; padding: 0 12px; font-size: 14px;
+    outline: none; color: #111; background: #fff;
+  }
+  .email-input:focus { border-color: #7F77DD; }
+  .btn-email {
+    background: #7F77DD; color: #fff; border: none;
+    border-radius: 8px; padding: 0 20px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    height: 42px; white-space: nowrap;
+  }
+  .btn-email:hover { background: #6b63c9; }
+  .btn-skip {
+    background: none; border: none; color: #aaa;
+    font-size: 12px; cursor: pointer; text-decoration: underline;
+  }
+
+  /* RESULTS */
+  .result { display: none; } .result.active { display: block; }
+  .result-header {
+    background: #EEEDFE; border-radius: 12px;
+    padding: 1.5rem; margin-bottom: 1.5rem; text-align: center;
+  }
+  .result-badge {
+    display: inline-block; background: #7F77DD; color: #fff;
+    font-size: 12px; font-weight: 600; padding: 4px 14px;
+    border-radius: 20px; margin-bottom: .75rem;
+  }
+  .result-title { font-size: 21px; font-weight: 700; color: #3C3489; margin-bottom: .5rem; }
+  .result-desc { font-size: 14px; color: #534AB7; line-height: 1.65; }
+
+  .automations-label {
+    font-size: 11px; font-weight: 700; color: #999;
+    text-transform: uppercase; letter-spacing: .07em; margin-bottom: .75rem;
+  }
+  .auto-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 15px; border: 1px solid #ebebeb;
+    border-radius: 10px; background: #fff; margin-bottom: 8px;
+  }
+  .auto-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #EEEDFE; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .auto-title { font-size: 13px; font-weight: 600; color: #111; margin-bottom: 3px; }
+  .auto-desc { font-size: 12px; color: #777; line-height: 1.5; }
+  .impact {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 9px; border-radius: 20px; margin-top: 5px;
+  }
+  .impact.high { background: #EAF3DE; color: #3B6D11; }
+  .impact.med { background: #FAEEDA; color: #854F0B; }
+
+  .cta-card {
+    background: #f8f8f6; border-radius: 12px;
+    padding: 1.5rem; text-align: center;
+    border: 1px solid #ebebeb; margin-top: 1.5rem;
+  }
+  .cta-text { font-size: 16px; font-weight: 700; color: #111; margin-bottom: .4rem; }
+  .cta-sub { font-size: 13px; color: #666; margin-bottom: 1.25rem; line-height: 1.55; }
+  .btn-cta {
+    display: inline-block; background: #7F77DD; color: #fff;
+    border: none; border-radius: 8px; padding: 13px 28px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    width: 100%; max-width: 300px; text-decoration: none;
+  }
+  .btn-cta:hover { background: #6b63c9; }
+  .restart {
+    background: none; border: none; color: #aaa;
+    font-size: 12px; cursor: pointer; margin-top: .75rem;
+    text-decoration: underline; display: block;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 1.75rem 1.25rem; }
+    .question-text { font-size: 17px; }
+    .email-row { flex-direction: column; }
+    .btn-email { height: 42px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Mathieu · Automatisations B2B</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+
+  <!-- Q1 -->
+  <div class="step active" id="s1">
+    <div class="question-label">Question 1 / 4</div>
+    <div class="question-text">Quel est votre plus grand défi en ce moment dans votre business ?</div>
+    <div class="options">
+      <button class="opt" data-q="1" data-v="leads" onclick="sel(this)">
+        <div class="opt-icon">🎯</div>
+        <div><span class="opt-title">Générer des leads qualifiés</span><span class="opt-sub">Le pipeline est trop faible ou peu régulier</span></div>
+      </button>
+      <button class="opt" data-q="1" data-v="time" onclick="sel(this)">
+        <div class="opt-icon">⏱️</div>
+        <div><span class="opt-title">Manquer de temps</span><span class="opt-sub">Je fais trop de tâches répétitives à la main</span></div>
+      </button>
+      <button class="opt" data-q="1" data-v="clients" onclick="sel(this)">
+        <div class="opt-icon">🤝</div>
+        <div><span class="opt-title">Fidéliser et upsell mes clients</span><span class="opt-sub">J'ai du mal à maximiser la valeur de mes clients actuels</span></div>
+      </button>
+      <button class="opt" data-q="1" data-v="scale" onclick="sel(this)">
+        <div class="opt-icon">📈</div>
+        <div><span class="opt-title">Scaler sans recruter</span><span class="opt-sub">Je veux grandir mais pas exploser les coûts RH</span></div>
+      </button>
+    </div>
+    <div class="nav"><button class="btn-next" id="n1" onclick="next(1)">Suivant →</button></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="step" id="s2">
+    <div class="question-label">Question 2 / 4</div>
+    <div class="question-text">Combien de temps passez-vous sur des tâches administratives par semaine ?</div>
+    <div class="options">
+      <button class="opt" data-q="2" data-v="low" onclick="sel(this)">
+        <div class="opt-icon">😌</div>
+        <div><span class="opt-title">Moins de 2h</span><span class="opt-sub">J'ai déjà quelques process en place</span></div>
+      </button>
+      <button class="opt" data-q="2" data-v="mid" onclick="sel(this)">
+        <div class="opt-icon">😐</div>
+        <div><span class="opt-title">Entre 2h et 5h</span><span class="opt-sub">C'est gérable mais ça commence à peser</span></div>
+      </button>
+      <button class="opt" data-q="2" data-v="high" onclick="sel(this)">
+        <div class="opt-icon">😩</div>
+        <div><span class="opt-title">Plus de 5h</span><span class="opt-sub">Je passe plus de temps à administrer qu'à produire</span></div>
+      </button>
+    </div>
+    <div class="nav"><button class="btn-next" id="n2" onclick="next(2)">Suivant →</button></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="step" id="s3">
+    <div class="question-label">Question 3 / 4</div>
+    <div class="question-text">Quels outils utilisez-vous déjà au quotidien ?</div>
+    <div class="options">
+      <button class="opt" data-q="3" data-v="notion" onclick="sel(this)">
+        <div class="opt-icon">📝</div>
+        <div><span class="opt-title">Notion / Google Workspace</span><span class="opt-sub">Pour organiser, documenter, collaborer</span></div>
+      </button>
+      <button class="opt" data-q="3" data-v="crm" onclick="sel(this)">
+        <div class="opt-icon">💼</div>
+        <div><span class="opt-title">CRM (HubSpot, Pipedrive…)</span><span class="opt-sub">Je suis les prospects et clients</span></div>
+      </button>
+      <button class="opt" data-q="3" data-v="email" onclick="sel(this)">
+        <div class="opt-icon">📧</div>
+        <div><span class="opt-title">Email marketing (Mailchimp, Brevo…)</span><span class="opt-sub">J'envoie des séquences ou newsletters</span></div>
+      </button>
+      <button class="opt" data-q="3" data-v="none" onclick="sel(this)">
+        <div class="opt-icon">🔧</div>
+        <div><span class="opt-title">Rien de structuré pour l'instant</span><span class="opt-sub">Je travaille surtout à la main</span></div>
+      </button>
+    </div>
+    <div class="nav"><button class="btn-next" id="n3" onclick="next(3)">Suivant →</button></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="step" id="s4">
+    <div class="question-label">Question 4 / 4</div>
+    <div class="question-text">Quel résultat vous ferait gagner le plus en 90 jours ?</div>
+    <div class="options">
+      <button class="opt" data-q="4" data-v="rdv" onclick="sel(this)">
+        <div class="opt-icon">📅</div>
+        <div><span class="opt-title">2× plus de RDV qualifiés</span><span class="opt-sub">Mon pipeline doit être plus actif</span></div>
+      </button>
+      <button class="opt" data-q="4" data-v="temps" onclick="sel(this)">
+        <div class="opt-icon">⚡</div>
+        <div><span class="opt-title">10h récupérées par semaine</span><span class="opt-sub">Je veux du temps pour les vraies priorités</span></div>
+      </button>
+      <button class="opt" data-q="4" data-v="revenue" onclick="sel(this)">
+        <div class="opt-icon">💰</div>
+        <div><span class="opt-title">+30% de revenue sans effort supplémentaire</span><span class="opt-sub">Upsell, rétention, récurrence</span></div>
+      </button>
+    </div>
+    <div class="nav"><button class="btn-next" id="n4" onclick="showGate()">Voir mes automatisations →</button></div>
+  </div>
+
+  <!-- EMAIL GATE -->
+  <div class="email-gate" id="gate">
+    <div class="gate-emoji">📬</div>
+    <div class="gate-title">Vos résultats sont prêts</div>
+    <div class="gate-sub">Laissez votre email pour être recontacté — ou passez directement aux résultats.</div>
+    <div class="email-row">
+      <input class="email-input" type="email" id="email-field" placeholder="votre@email.com" />
+      <button class="btn-email" onclick="submitEmail()">Valider</button>
+    </div>
+    <button class="btn-skip" onclick="showResult()">Non merci, voir les résultats directement →</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="result" id="result-box">
+    <div class="result-header">
+      <div class="result-badge" id="r-badge"></div>
+      <div class="result-title" id="r-title"></div>
+      <div class="result-desc" id="r-desc"></div>
+    </div>
+    <div class="automations-label">Vos 4 automatisations prioritaires</div>
+    <div id="r-autos"></div>
+    <div class="cta-card">
+      <div class="cta-text">Prêt à mettre ça en place ?</div>
+      <div class="cta-sub">30 min ensemble pour analyser votre situation et repartir avec un plan d'action concret — sans engagement.</div>
+      <!-- REMPLACE le href par ton lien Calendly -->
+      <a class="btn-cta" href="https://calendly.com/TON-LIEN" target="_blank">Réserver un appel gratuit →</a>
+      <br><button class="restart" onclick="restart()">Recommencer le quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const answers = {};
+
+function sel(btn) {
+  const q = btn.dataset.q;
+  document.querySelectorAll('[data-q="'+q+'"]').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[q] = btn.dataset.v;
+  document.getElementById('n'+q).classList.add('ready');
+}
+
+function next(step) {
+  if (!answers[step]) return;
+  document.getElementById('s'+step).classList.remove('active');
+  document.getElementById('s'+(step+1)).classList.add('active');
+  document.getElementById('prog').style.width = (step / 4 * 100) + '%';
+}
+
+function showGate() {
+  if (!answers[4]) return;
+  document.getElementById('s4').classList.remove('active');
+  document.getElementById('gate').classList.add('active');
+  document.getElementById('prog').style.width = '90%';
+}
+
+function submitEmail() {
+  const val = document.getElementById('email-field').value.trim();
+  if (!val || !val.includes('@')) {
+    document.getElementById('email-field').style.borderColor = '#E24B4A';
+    return;
+  }
+  showResult();
+}
+
+const profiles = {
+  leads:{badge:'🎯 Profil Acquisition',title:'Votre levier : automatiser votre prospection',desc:'Votre pipeline repose encore trop sur l\'effort manuel. Les bons systèmes vous feront générer des RDV qualifiés en continu, sans y penser.',autos:[{icon:'🔍',title:'Scraping + enrichissement automatique',desc:'Identifiez vos prospects idéaux sur LinkedIn et récupérez leurs coordonnées sans intervention manuelle.',impact:'high'},{icon:'✉️',title:'Séquence de prospection multicanal',desc:'Email + LinkedIn en séquence automatisée : relances programmées, personnalisation dynamique.',impact:'high'},{icon:'📅',title:'Prise de RDV automatique',desc:'Un lien Calendly connecté à votre CRM — plus aucun aller-retour par email pour caler un créneau.',impact:'high'},{icon:'📊',title:'Scoring et priorisation des leads',desc:'Classez vos prospects par niveau d\'intérêt automatiquement pour toujours traiter en priorité les plus chauds.',impact:'med'}]},
+  time:{badge:'⏱️ Profil Efficacité',title:'Votre levier : récupérer 10h par semaine',desc:'Vous gérez encore trop de tâches qui n\'ont pas besoin de vous. L\'automatisation va vous libérer du temps pour les missions à haute valeur.',autos:[{icon:'🤖',title:'Traitement automatique des emails entrants',desc:'Classement, labellisation et réponses types déclenchées selon le type de demande reçue.',impact:'high'},{icon:'📋',title:'Génération automatique de propositions',desc:'Un formulaire client → une proposition commerciale au format prêt-à-envoyer, sans repartir de zéro.',impact:'high'},{icon:'🔔',title:'Rappels et suivis clients automatiques',desc:'Vos clients reçoivent des rappels de paiement, de validation ou d\'action sans que vous le fassiez.',impact:'high'},{icon:'📁',title:'Reporting automatisé',desc:'Un dashboard qui se met à jour seul avec vos KPIs clés — fini les synthèses manuelles.',impact:'med'}]},
+  clients:{badge:'🤝 Profil Rétention',title:'Votre levier : maximiser la valeur client',desc:'Vos clients actuels sont votre actif le plus rentable. Quelques automatisations bien placées transforment la satisfaction en revenue récurrent.',autos:[{icon:'🎯',title:'Séquence d\'onboarding client automatisée',desc:'Chaque nouveau client reçoit les bonnes ressources, au bon moment, sans que vous ayez à intervenir.',impact:'high'},{icon:'💬',title:'Enquêtes de satisfaction automatiques',desc:'Déclenchez un NPS ou une review automatiquement à J+30, J+90 et en fin de mission.',impact:'med'},{icon:'⬆️',title:'Détection des opportunités d\'upsell',desc:'Identifiez automatiquement les signaux qui indiquent qu\'un client est prêt pour une offre supérieure.',impact:'high'},{icon:'🔄',title:'Relance des clients inactifs',desc:'Une séquence se déclenche si un client n\'a pas interagi depuis X jours — sans effort de votre part.',impact:'med'}]},
+  scale:{badge:'📈 Profil Scale',title:'Votre levier : une machine qui tourne seule',desc:'Vous êtes prêt à passer au niveau supérieur. L\'enjeu c\'est de construire des systèmes qui scalent sans dépendre de votre présence.',autos:[{icon:'🔗',title:'CRM connecté à tous vos outils',desc:'HubSpot / Notion / Stripe / Cal.com synchronisés — chaque action dans un outil met à jour les autres.',impact:'high'},{icon:'🧩',title:'Workflow de delivery standardisé',desc:'De la signature du contrat à la livraison finale : chaque étape déclenchée automatiquement.',impact:'high'},{icon:'📣',title:'Repurposing de contenu automatique',desc:'Un post LinkedIn → newsletter + thread + story générés et programmés automatiquement.',impact:'med'},{icon:'💳',title:'Facturation et relances automatiques',desc:'Factures générées et envoyées automatiquement, relances de paiement sans intervention manuelle.',impact:'high'}]}
+};
+
+function showResult() {
+  document.getElementById('gate').classList.remove('active');
+  document.getElementById('result-box').classList.add('active');
+  document.getElementById('prog').style.width = '100%';
+  const key = answers[1] || 'time';
+  const p = profiles[key];
+  document.getElementById('r-badge').textContent = p.badge;
+  document.getElementById('r-title').textContent = p.title;
+  document.getElementById('r-desc').textContent = p.desc;
+  const c = document.getElementById('r-autos');
+  c.innerHTML = '';
+  p.autos.forEach(a => {
+    c.innerHTML += `<div class="auto-item"><div class="auto-icon">${a.icon}</div><div><div class="auto-title">${a.title}</div><div class="auto-desc">${a.desc}</div><span class="impact ${a.impact}">${a.impact==='high'?'⚡ Impact fort':'📊 Impact moyen'}</span></div></div>`;
+  });
+}
+
+function restart() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('gate').classList.remove('active');
+  document.getElementById('result-box').classList.remove('active');
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.btn-next').forEach(b => b.classList.remove('ready'));
+  document.getElementById('email-field').value = '';
+  document.getElementById('s1').classList.add('active');
+  document.getElementById('prog').style.width = '0%';
+}
+</script>
+</body>
+</html>
