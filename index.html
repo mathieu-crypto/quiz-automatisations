@@ -321,6 +321,7 @@ function submitEmail() {
   }
   fetch('https://n8n.srv1289414.hstgr.cloud/webhook/a081002a-ad32-4997-9c43-95d1798c881d', {
     method: 'POST',
+    mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: val })
   });
