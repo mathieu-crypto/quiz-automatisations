@@ -319,6 +319,11 @@ function submitEmail() {
     document.getElementById('email-field').style.borderColor = '#E24B4A';
     return;
   }
+  fetch('https://n8n.srv1289414.hstgr.cloud/webhook/a081002a-ad32-4997-9c43-95d1798c881d', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: val })
+  });
   showResult();
 }
 
