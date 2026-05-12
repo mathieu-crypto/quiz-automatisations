@@ -335,11 +335,40 @@ const profiles = {
   scale:{badge:'📈 Profil Scale',title:'Votre levier : une machine qui tourne seule',desc:'Vous êtes prêt à passer au niveau supérieur. L\'enjeu c\'est de construire des systèmes qui scalent sans dépendre de votre présence.',autos:[{icon:'🔗',title:'CRM connecté à tous vos outils',desc:'HubSpot / Notion / Stripe / Cal.com synchronisés — chaque action dans un outil met à jour les autres.',impact:'high'},{icon:'🧩',title:'Workflow de delivery standardisé',desc:'De la signature du contrat à la livraison finale : chaque étape déclenchée automatiquement.',impact:'high'},{icon:'📣',title:'Repurposing de contenu automatique',desc:'Un post LinkedIn → newsletter + thread + story générés et programmés automatiquement.',impact:'med'},{icon:'💳',title:'Facturation et relances automatiques',desc:'Factures générées et envoyées automatiquement, relances de paiement sans intervention manuelle.',impact:'high'}]}
 };
 
+function calcProfile() {
+  const scores = { leads: 0, time: 0, clients: 0, scale: 0 };
+
+  // Q1 — Défi principal
+  if (answers[1] === 'leads')   { scores.leads += 3; }
+  if (answers[1] === 'time')    { scores.time += 3; }
+  if (answers[1] === 'clients') { scores.clients += 3; }
+  if (answers[1] === 'scale')   { scores.scale += 3; }
+
+  // Q2 — Temps admin
+  if (answers[2] === 'low')  { scores.leads += 1; scores.scale += 1; }
+  if (answers[2] === 'mid')  { scores.clients += 1; }
+  if (answers[2] === 'high') { scores.time += 3; }
+
+  // Q3 — Outils
+  if (answers[3] === 'notion') { scores.time += 1; }
+  if (answers[3] === 'crm')    { scores.leads += 2; scores.scale += 1; }
+  if (answers[3] === 'email')  { scores.clients += 2; }
+  if (answers[3] === 'none')   { scores.time += 2; scores.leads += 1; }
+
+  // Q4 — Résultat voulu
+  if (answers[4] === 'rdv')     { scores.leads += 3; }
+  if (answers[4] === 'temps')   { scores.time += 3; }
+  if (answers[4] === 'revenue') { scores.clients += 3; scores.scale += 2; }
+
+  // Trouver le profil gagnant
+  return Object.entries(scores).reduce((a, b) => a[1] >= b[1] ? a : b)[0];
+}
+
 function showResult() {
   document.getElementById('gate').classList.remove('active');
   document.getElementById('result-box').classList.add('active');
   document.getElementById('prog').style.width = '100%';
-  const key = answers[1] || 'time';
+  const key = calcProfile();
   const p = profiles[key];
   document.getElementById('r-badge').textContent = p.badge;
   document.getElementById('r-title').textContent = p.title;
